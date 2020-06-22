@@ -4,35 +4,7 @@ package br.com.devdojo.error;
  * @author yvesguilherme on 21/06/2020.
  * @project spring-boot-essentials
  */
-public class ResourceNotFoundDetails {
-    private String title;
-    private int status;
-    private String detail;
-    private Long timestamp;
-    private String developerMessage;
-
-    private ResourceNotFoundDetails() {
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public String getDetail() {
-        return detail;
-    }
-
-    public Long getTimestamp() {
-        return timestamp;
-    }
-
-    public String getDeveloperMessage() {
-        return developerMessage;
-    }
+public class ResourceNotFoundDetails extends ErrorDetail {
 
     public static final class Builder {
         private String title;
@@ -75,11 +47,11 @@ public class ResourceNotFoundDetails {
 
         public ResourceNotFoundDetails build() {
             ResourceNotFoundDetails resourceNotFoundDetails = new ResourceNotFoundDetails();
-            resourceNotFoundDetails.detail = this.detail;
-            resourceNotFoundDetails.timestamp = this.timestamp;
-            resourceNotFoundDetails.developerMessage = this.developerMessage;
-            resourceNotFoundDetails.status = this.status;
-            resourceNotFoundDetails.title = this.title;
+            resourceNotFoundDetails.setDetail(detail);
+            resourceNotFoundDetails.setTimestamp(timestamp);
+            resourceNotFoundDetails.setDeveloperMessage(developerMessage);
+            resourceNotFoundDetails.setStatus(status);
+            resourceNotFoundDetails.setTitle(title);
             return resourceNotFoundDetails;
         }
     }
