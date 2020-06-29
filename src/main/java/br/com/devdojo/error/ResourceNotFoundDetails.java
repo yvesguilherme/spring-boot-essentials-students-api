@@ -4,7 +4,7 @@ package br.com.devdojo.error;
  * @author yvesguilherme on 21/06/2020.
  * @project spring-boot-essentials
  */
-public class ResourceNotFoundDetails extends ErrorDetail {
+public class ResourceNotFoundDetails extends ErrorDetails {
 
     public static final class Builder {
         private String title;
