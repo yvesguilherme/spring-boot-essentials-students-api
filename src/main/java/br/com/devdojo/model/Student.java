@@ -18,8 +18,17 @@ public class Student extends AbstractEntity {
 
     @NotEmpty(message = "O campo e-mail é obrigatório!")
     @NotNull
-    @Email
+    @Email(message = "O campo e-mail deve ser válido!")
     private String email;
+
+    public Student() {
+
+    }
+
+    public Student(@NotEmpty(message = "O campo nome do estudante é obrigatório!") @NotNull String name, @NotEmpty(message = "O campo e-mail é obrigatório!") @NotNull @Email String email) {
+        this.name = name;
+        this.email = email;
+    }
 
     public String getName() {
         return name;
