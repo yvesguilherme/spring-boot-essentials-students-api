@@ -33,6 +33,7 @@ public class StudentEndpoint {
 
     @GetMapping("protected/students")
     public ResponseEntity<?> listAll(Pageable pageable) {
+        System.out.println(studentDAO.findAll());
 //        System.out.println(dateUtil.formatLocalDateTimeToDatabaseStyle(LocalDateTime.now()));
         return new ResponseEntity<>(studentDAO.findAll(pageable), HttpStatus.OK);
     }
