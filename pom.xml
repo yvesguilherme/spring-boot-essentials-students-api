@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>br.com.devdojo</groupId>
-    <artifactId>demo</artifactId>
+    <artifactId>curso-devdojo</artifactId>
     <version>0.0.1</version>
-    <name>demo</name>
+    <name>curso-devdojo</name>
     <description>Curso de SpringBoot do DevDojo</description>
 
     <properties>
