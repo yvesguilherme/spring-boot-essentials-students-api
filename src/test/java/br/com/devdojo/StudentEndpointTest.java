@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,27 +24,22 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.client.ResourceAccessException;
 
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.hamcrest.Matchers.is;
 
 /**
  * @author yvesguilherme on 22/07/2020.
@@ -142,4 +136,91 @@ public class StudentEndpointTest {
 
         verify(studentRepository).findById(6L);
     }
+
+    @Test
+    @WithMockUser(username = "xxx", password = "xxx", roles = {"ADMIN"})
+    public void deleteWhenUserHasRoleAdminAndStudentExistsShouldReturnStatusCode200() throws Exception {
+        Student student = new Student(1L, "Legolas", "legolas@lotr.com");
+
+        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
+
+        doNothing().when(studentRepository).deleteById(student.getId());
+
+        mockMvc.perform(delete("/v1/admin/students/{id}", student.getId()))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        verify(studentRepository).deleteById(student.getId());
+    }
+
+    @Test
+    @WithMockUser(username = "xxx", password = "xxx", roles = {"ADMIN"})
+    public void deleteWhenUserHasRoleAdminAndStudentDoesNotExistShouldReturnStatusCode404() throws Exception {
+        doNothing().when(studentRepository).deleteById(1L);
+
+        mockMvc.perform(delete("/v1/admin/students/{id}", 1L))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+
+        verify(studentRepository, atLeast(1)).findById(1L);
+    }
+
+    @Test
+    @WithMockUser(username = "xxx", password = "xxx", roles = {"USER"})
+    public void deleteWhenUserDoesNotHaveRoleAdminShouldReturnStatusCode403() throws Exception {
+        doNothing().when(studentRepository).deleteById(1L);
+
+        mockMvc.perform(delete("/v1/admin/students/{id}", 1L))
+                .andExpect(status().isForbidden())
+                .andDo(print());
+    }
+
+    @Test
+    @WithMockUser(username = "xxx", password = "xxx", roles = {"ADMIN"})
+    public void createWhenNameIsNullShouldReturnStatusCode400() throws Exception {
+        Student student = new Student(1L, "", "legolas@lotr.com");
+
+        when(studentRepository.save(student)).thenReturn(student);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString = mapper.writeValueAsString(student);
+
+        mockMvc.perform(post("/v1/admin/students/").contentType(MediaType.APPLICATION_JSON).content(jsonString))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    @WithMockUser(username = "xxx", password = "xxx", roles = {"ADMIN"})
+    public void createShouldPersistDataAndReturnStatusCode201() throws Exception {
+        Student student = new Student(1L, "Legolas", "legolas@lotr.com");
+
+        when(studentRepository.save(student)).thenReturn(student);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString = mapper.writeValueAsString(student);
+
+        mockMvc.perform(post("/v1/admin/students/").contentType(MediaType.APPLICATION_JSON).content(jsonString))
+                .andExpect(status().isCreated())
+                .andDo(print());
+    }
+
+    @Test
+    @WithMockUser(username = "xxx", password = "xxx", roles = {"ADMIN"})
+    public void updateStudentUsingIncorrectUsernameAndPasswordShouldReturnResourceAccessException() throws Exception {
+        restTemplate = restTemplate.withBasicAuth("1", "1");
+
+        Student student = new Student(1L, "Legolas", "legolas@lotr.com");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Student> entity = new HttpEntity<Student>(student, headers);
+
+        assertThrows(ResourceAccessException.class,
+                () -> restTemplate.exchange("/v1/admin/students", PUT, entity, String.class, 1L)
+        );
+    }
+
+
 }
